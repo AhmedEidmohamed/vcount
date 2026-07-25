@@ -141,13 +141,17 @@ class AuthService {
 
     if (local.isNotEmpty) {
       await _recordLoginAudit(local['username'], local['role'] ?? 'user', local['id']);
-      return {
-        'success': true,
-        'message': 'تم تسجيل الدخول بنجاح',
+      final session = {
         'userId': local['id'],
         'username': local['username'],
         'name': local['name'],
         'role': local['role'],
+      };
+      await saveSession(session);
+      return {
+        'success': true,
+        'message': 'تم تسجيل الدخول بنجاح',
+        ...session,
       };
     }
 
@@ -172,13 +176,18 @@ class AuthService {
 
           await _recordLoginAudit(data['username'], data['role'] ?? 'user', doc.id);
 
-          return {
-            'success': true,
-            'message': 'تم تسجيل الدخول بنجاح',
+          final session = {
             'userId': doc.id,
             'username': data['username'],
             'name': data['name'] ?? data['username'],
             'role': data['role'] ?? 'user',
+          };
+          await saveSession(session);
+
+          return {
+            'success': true,
+            'message': 'تم تسجيل الدخول بنجاح',
+            ...session,
           };
         } else {
           return {'success': false, 'message': 'كلمة المرور غير صحيحة'};
@@ -345,6 +354,45 @@ class AuthService {
         .orderBy('timestamp', descending: true)
         .limit(50)
         .snapshots();
+  }
+
+  // =========================================================================
+  //  SESSION PERSISTENCE — حفظ جلسة تسجيل الدخول محلياً
+  // =========================================================================
+  static const String _sessionUserKey = 'vcount_session_user';
+
+  /// حفظ بيانات المستخدم الحالي في SharedPreferences
+  Future<void> saveSession(Map<String, dynamic> userData) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_sessionUserKey, jsonEncode(userData));
+    } catch (e) {
+      print('[AuthService] Failed to save session: $e');
+    }
+  }
+
+  /// مسح جلسة المستخدم (عند تسجيل الخروج)
+  Future<void> clearSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_sessionUserKey);
+    } catch (e) {
+      print('[AuthService] Failed to clear session: $e');
+    }
+  }
+
+  /// جلب بيانات الجلسة الحالية المحفوظة
+  Future<Map<String, dynamic>?> getCurrentSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_sessionUserKey);
+      if (raw != null && raw.isNotEmpty) {
+        return jsonDecode(raw) as Map<String, dynamic>;
+      }
+    } catch (e) {
+      print('[AuthService] Failed to get session: $e');
+    }
+    return null;
   }
 
   // =========================================================================

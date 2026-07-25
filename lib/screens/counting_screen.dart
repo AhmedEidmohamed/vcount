@@ -427,8 +427,9 @@ class _CountingScreenState extends State<CountingScreen>
       } catch (_) {}
     }
 
-    // 3. تسجيل حدث الخروج في السجل
+    // 3. مسح الجلسة المحفوظة وتسجيل حدث الخروج في السجل
     try {
+      await AuthService().clearSession();
       await AuthService().logActivity(
         username: widget.username,
         action: 'تسجيل خروج',

@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/login_screen.dart';
+import 'screens/counting_screen.dart';
+import 'screens/admin_dashboard_screen.dart';
 import 'services/auth_service.dart';
 
 // تجاوز التحقق من SSL على Windows (للتطوير فقط)
@@ -35,14 +37,35 @@ void main() async {
     debugPrint('Seed error: $e');
   }
 
-  runApp(const VCountApp());
+  // ── التحقق من وجود جلسة دخول محفوظة ──────────────────────────
+  final savedSession = await AuthService().getCurrentSession();
+
+  runApp(VCountApp(savedSession: savedSession));
 }
 
 class VCountApp extends StatelessWidget {
-  const VCountApp({super.key});
+  final Map<String, dynamic>? savedSession;
+
+  const VCountApp({super.key, this.savedSession});
 
   @override
   Widget build(BuildContext context) {
+    Widget homeScreen;
+
+    if (savedSession != null) {
+      final role = savedSession!['role'] as String? ?? 'user';
+      final userId = savedSession!['userId'] as String? ?? '';
+      final username = savedSession!['username'] as String? ?? '';
+
+      if (role == 'admin' || username.toLowerCase().contains('admin')) {
+        homeScreen = AdminDashboardScreen(userId: userId, username: username);
+      } else {
+        homeScreen = CountingScreen(userId: userId, username: username);
+      }
+    } else {
+      homeScreen = const LoginScreen();
+    }
+
     return MaterialApp(
       title: 'V-Count Pro',
       debugShowCheckedModeBanner: false,
@@ -62,7 +85,7 @@ class VCountApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const LoginScreen(),
+      home: homeScreen,
     );
   }
 }

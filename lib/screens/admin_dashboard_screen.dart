@@ -266,17 +266,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               leading: const Icon(Icons.logout, color: Colors.redAccent),
               title: const Text('تسجيل الخروج',
                   style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-              onTap: () {
+              onTap: () async {
+                await AuthService().clearSession();
                 AuthService().logActivity(
                   username: widget.username,
                   action: 'تسجيل خروج',
                   role: 'admin',
                 );
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                );
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  );
+                }
               },
             ),
           ],
