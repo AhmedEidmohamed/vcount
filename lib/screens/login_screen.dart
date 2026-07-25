@@ -3,7 +3,6 @@ import '../theme/app_colors.dart';
 import '../services/auth_service.dart';
 import 'counting_screen.dart';
 import 'admin_dashboard_screen.dart';
-import 'admin_login_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -97,20 +96,16 @@ class _LoginScreenState extends State<LoginScreen>
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => AdminDashboardScreen(
-              userId: userId,
-              username: userUsername,
-            ),
+            builder: (_) =>
+                AdminDashboardScreen(userId: userId, username: userUsername),
           ),
         );
       } else {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => CountingScreen(
-              userId: userId,
-              username: userUsername,
-            ),
+            builder: (_) =>
+                CountingScreen(userId: userId, username: userUsername),
           ),
         );
       }
@@ -180,8 +175,11 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
               ],
             ),
-            child: const Icon(Icons.bar_chart_rounded,
-                color: Colors.white, size: 36),
+            child: const Icon(
+              Icons.bar_chart_rounded,
+              color: Colors.white,
+              size: 36,
+            ),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -292,12 +290,14 @@ class _LoginScreenState extends State<LoginScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textDark,
-            )),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textDark,
+          ),
+        ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
@@ -310,8 +310,7 @@ class _LoginScreenState extends State<LoginScreen>
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(color: AppColors.textLight, fontSize: 14),
-            prefixIcon:
-                Icon(prefixIcon, color: AppColors.textLight, size: 20),
+            prefixIcon: Icon(prefixIcon, color: AppColors.textLight, size: 20),
             filled: true,
             fillColor: AppColors.background,
             border: OutlineInputBorder(
@@ -324,11 +323,15 @@ class _LoginScreenState extends State<LoginScreen>
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: AppColors.primaryLight, width: 1.5),
+              borderSide: const BorderSide(
+                color: AppColors.primaryLight,
+                width: 1.5,
+              ),
             ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
           ),
         ),
       ],
@@ -359,8 +362,11 @@ class _LoginScreenState extends State<LoginScreen>
           decoration: InputDecoration(
             hintText: '••••••••',
             hintStyle: TextStyle(color: AppColors.textLight, fontSize: 14),
-            prefixIcon: const Icon(Icons.lock_outline,
-                color: AppColors.textLight, size: 20),
+            prefixIcon: const Icon(
+              Icons.lock_outline,
+              color: AppColors.textLight,
+              size: 20,
+            ),
             suffixIcon: IconButton(
               icon: Icon(
                 _passwordVisible ? Icons.visibility : Icons.visibility_off,
@@ -382,11 +388,15 @@ class _LoginScreenState extends State<LoginScreen>
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: AppColors.primaryLight, width: 1.5),
+              borderSide: const BorderSide(
+                color: AppColors.primaryLight,
+                width: 1.5,
+              ),
             ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
           ),
         ),
       ],
@@ -403,15 +413,18 @@ class _LoginScreenState extends State<LoginScreen>
           backgroundColor: AppColors.primaryLight,
           foregroundColor: Colors.white,
           elevation: 0,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
         ),
         child: _isLoading
             ? const SizedBox(
                 width: 22,
                 height: 22,
                 child: CircularProgressIndicator(
-                    color: Colors.white, strokeWidth: 2.5),
+                  color: Colors.white,
+                  strokeWidth: 2.5,
+                ),
               )
             : const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -432,8 +445,6 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-
-
   Widget _buildFooter() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
@@ -441,10 +452,7 @@ class _LoginScreenState extends State<LoginScreen>
         children: [
           Text(
             'v2.4.1 (Stable)  •  النظام متصل',
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.textLight,
-            ),
+            style: TextStyle(fontSize: 12, color: AppColors.textLight),
           ),
           const SizedBox(height: 4),
           Row(

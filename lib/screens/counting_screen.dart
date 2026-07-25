@@ -1038,37 +1038,6 @@ class _CountingScreenState extends State<CountingScreen>
               ),
                 ],
               ),
-              const SizedBox(height: 10),
-              // زرار تسجيل الخروج الواضح
-              SizedBox(
-                width: double.infinity,
-                child: GestureDetector(
-                  onTap: () => _showLogoutConfirmDialog(),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 11),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFEEEE),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.redAccent, width: 1.5),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.logout_rounded, color: Colors.redAccent, size: 18),
-                        SizedBox(width: 8),
-                        Text(
-                          'تسجيل الخروج',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.redAccent,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
