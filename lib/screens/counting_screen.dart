@@ -15,11 +15,7 @@ class VehicleCategory {
   final IconData icon;
   int count;
 
-  VehicleCategory({
-    required this.nameAr,
-    required this.icon,
-    this.count = 0,
-  });
+  VehicleCategory({required this.nameAr, required this.icon, this.count = 0});
 }
 
 class CountingScreen extends StatefulWidget {
@@ -110,18 +106,24 @@ class _CountingScreenState extends State<CountingScreen>
             context: context,
             builder: (_) => AlertDialog(
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              title: const Text('خدمة الموقع (GPS) مغلقة',
-                  style: TextStyle(fontWeight: FontWeight.w800)),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text(
+                'خدمة الموقع (GPS) مغلقة',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
               content: const Text(
-                  'يرجى تفعيل خدمة الموقع (GPS) في الهاتف لتحديد موقعك وإحداثياتك بدقة.'),
+                'يرجى تفعيل خدمة الموقع (GPS) في الهاتف لتحديد موقعك وإحداثياتك بدقة.',
+              ),
               actions: [
                 TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: const Text('إلغاء')),
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('إلغاء'),
+                ),
                 ElevatedButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: const Text('تفعيل GPS')),
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('تفعيل GPS'),
+                ),
               ],
             ),
           );
@@ -145,18 +147,24 @@ class _CountingScreenState extends State<CountingScreen>
               context: context,
               builder: (_) => AlertDialog(
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                title: const Text('إذن الموقع مطلوب',
-                    style: TextStyle(fontWeight: FontWeight.w800)),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                title: const Text(
+                  'إذن الموقع مطلوب',
+                  style: TextStyle(fontWeight: FontWeight.w800),
+                ),
                 content: const Text(
-                    'يرجى السماح للتطبيق بالوصول إلى الموقع من إعدادات الجهاز.'),
+                  'يرجى السماح للتطبيق بالوصول إلى الموقع من إعدادات الجهاز.',
+                ),
                 actions: [
                   TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('إلغاء')),
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('إلغاء'),
+                  ),
                   ElevatedButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('فتح الإعدادات')),
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('فتح الإعدادات'),
+                  ),
                 ],
               ),
             );
@@ -186,12 +194,15 @@ class _CountingScreenState extends State<CountingScreen>
                 'Lat: ${pos.latitude.toStringAsFixed(6)}, Long: ${pos.longitude.toStringAsFixed(6)}';
 
             try {
-              final List<Placemark> placemarks =
-                  await placemarkFromCoordinates(pos.latitude, pos.longitude);
+              final List<Placemark> placemarks = await placemarkFromCoordinates(
+                pos.latitude,
+                pos.longitude,
+              );
               if (placemarks.isNotEmpty && mounted) {
                 final p = placemarks.first;
                 final List<String> addressParts = [];
-                if (p.street != null && p.street!.isNotEmpty) addressParts.add(p.street!);
+                if (p.street != null && p.street!.isNotEmpty)
+                  addressParts.add(p.street!);
                 if (p.subLocality != null &&
                     p.subLocality!.isNotEmpty &&
                     !addressParts.contains(p.subLocality)) {
@@ -253,11 +264,21 @@ class _CountingScreenState extends State<CountingScreen>
           _currentLongitude = double.tryParse(lng.toString());
         }
 
-        final parts = [city, region, country].where((x) => x.toString().isNotEmpty).toList();
+        final parts = [
+          city,
+          region,
+          country,
+        ].where((x) => x.toString().isNotEmpty).toList();
         if (parts.isNotEmpty && mounted) {
-          final latStr = _currentLatitude != null ? 'Lat: ${_currentLatitude!.toStringAsFixed(6)}' : '';
-          final lngStr = _currentLongitude != null ? 'Long: ${_currentLongitude!.toStringAsFixed(6)}' : '';
-          final coords = (latStr.isNotEmpty && lngStr.isNotEmpty) ? ' ($latStr, $lngStr)' : '';
+          final latStr = _currentLatitude != null
+              ? 'Lat: ${_currentLatitude!.toStringAsFixed(6)}'
+              : '';
+          final lngStr = _currentLongitude != null
+              ? 'Long: ${_currentLongitude!.toStringAsFixed(6)}'
+              : '';
+          final coords = (latStr.isNotEmpty && lngStr.isNotEmpty)
+              ? ' ($latStr, $lngStr)'
+              : '';
 
           setState(() {
             _locationName = '${parts.join("، ")}$coords';
@@ -287,11 +308,20 @@ class _CountingScreenState extends State<CountingScreen>
           _currentLongitude = double.tryParse(lng.toString());
         }
 
-        final parts = [city, region].where((x) => x.toString().isNotEmpty).toList();
+        final parts = [
+          city,
+          region,
+        ].where((x) => x.toString().isNotEmpty).toList();
         if (parts.isNotEmpty && mounted) {
-          final latStr = _currentLatitude != null ? 'Lat: ${_currentLatitude!.toStringAsFixed(6)}' : '';
-          final lngStr = _currentLongitude != null ? 'Long: ${_currentLongitude!.toStringAsFixed(6)}' : '';
-          final coords = (latStr.isNotEmpty && lngStr.isNotEmpty) ? ' ($latStr, $lngStr)' : '';
+          final latStr = _currentLatitude != null
+              ? 'Lat: ${_currentLatitude!.toStringAsFixed(6)}'
+              : '';
+          final lngStr = _currentLongitude != null
+              ? 'Long: ${_currentLongitude!.toStringAsFixed(6)}'
+              : '';
+          final coords = (latStr.isNotEmpty && lngStr.isNotEmpty)
+              ? ' ($latStr, $lngStr)'
+              : '';
 
           setState(() {
             _locationName = '${parts.join("، ")}$coords';
@@ -326,13 +356,15 @@ class _CountingScreenState extends State<CountingScreen>
   Future<void> _startCountingSession() async {
     _sessionStartTime = DateTime.now();
     try {
-      final sessionId = await CountingService().startSession(
-        userId: widget.userId,
-        username: widget.username,
-        latitude: _currentLatitude,
-        longitude: _currentLongitude,
-        locationName: _locationName,
-      ).timeout(const Duration(seconds: 3), onTimeout: () => '');
+      final sessionId = await CountingService()
+          .startSession(
+            userId: widget.userId,
+            username: widget.username,
+            latitude: _currentLatitude,
+            longitude: _currentLongitude,
+            locationName: _locationName,
+          )
+          .timeout(const Duration(seconds: 3), onTimeout: () => '');
 
       if (sessionId.isNotEmpty) {
         _currentSessionId = sessionId;
@@ -367,7 +399,7 @@ class _CountingScreenState extends State<CountingScreen>
     if (_currentSessionId == null) return;
 
     final Map<String, int> totals = {
-      for (var c in _categories) c.nameAr: c.count
+      for (var c in _categories) c.nameAr: c.count,
     };
 
     CountingService().updateSessionMinuteData(
@@ -457,9 +489,7 @@ class _CountingScreenState extends State<CountingScreen>
       );
     }
 
-    final totals = {
-      for (var c in _categories) c.nameAr: c.count
-    };
+    final totals = {for (var c in _categories) c.nameAr: c.count};
 
     final currentMinute = (_secondsElapsed ~/ 60) + 1;
 
@@ -501,8 +531,7 @@ class _CountingScreenState extends State<CountingScreen>
     _syncTotals();
   }
 
-  double get _progressPercent =>
-      (_sessionTotal / _targetCount).clamp(0.0, 1.0);
+  double get _progressPercent => (_sessionTotal / _targetCount).clamp(0.0, 1.0);
 
   @override
   Widget build(BuildContext context) {
@@ -517,9 +546,9 @@ class _CountingScreenState extends State<CountingScreen>
               padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 1.7,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
+                childAspectRatio: 2.2,
+                crossAxisSpacing: 6,
+                mainAxisSpacing: 6,
               ),
               itemCount: _categories.length,
               itemBuilder: (context, index) => _buildCounterCard(index),
@@ -551,8 +580,11 @@ class _CountingScreenState extends State<CountingScreen>
                   ),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.bar_chart_rounded,
-                    color: Colors.white, size: 18),
+                child: const Icon(
+                  Icons.bar_chart_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -617,7 +649,10 @@ class _CountingScreenState extends State<CountingScreen>
               GestureDetector(
                 onTap: _handleLogout,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFEEEE),
                     borderRadius: BorderRadius.circular(10),
@@ -626,7 +661,11 @@ class _CountingScreenState extends State<CountingScreen>
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.logout_rounded, color: Colors.redAccent, size: 16),
+                      Icon(
+                        Icons.logout_rounded,
+                        color: Colors.redAccent,
+                        size: 16,
+                      ),
                       SizedBox(width: 4),
                       Text(
                         'خروج',
@@ -671,11 +710,17 @@ class _CountingScreenState extends State<CountingScreen>
                   ),
                 )
               else if (_locationError)
-                const Icon(Icons.location_off_outlined,
-                    size: 12, color: Colors.redAccent)
+                const Icon(
+                  Icons.location_off_outlined,
+                  size: 12,
+                  color: Colors.redAccent,
+                )
               else
-                const Icon(Icons.location_on_outlined,
-                    size: 14, color: AppColors.primaryLight),
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 14,
+                  color: AppColors.primaryLight,
+                ),
               const SizedBox(width: 4),
               Expanded(
                 child: Column(
@@ -714,7 +759,9 @@ class _CountingScreenState extends State<CountingScreen>
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 6, vertical: 3),
+                      horizontal: 6,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: _locationError
                           ? Colors.redAccent.withOpacity(0.1)
@@ -756,18 +803,28 @@ class _CountingScreenState extends State<CountingScreen>
             children: [
               Row(
                 children: [
-                  const Icon(Icons.access_time_filled_rounded, size: 13, color: AppColors.primaryLight),
+                  const Icon(
+                    Icons.access_time_filled_rounded,
+                    size: 13,
+                    color: AppColors.primaryLight,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     'وقت الفتح: ${_isStarted ? _formatTimeOfDay(_sessionStartTime) : "--:--"}',
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textDark),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textDark,
+                    ),
                   ),
                 ],
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: _isStarted ? const Color(0xFFD1FAE5) : const Color(0xFFF1F5F9),
+                  color: _isStarted
+                      ? const Color(0xFFD1FAE5)
+                      : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -775,7 +832,9 @@ class _CountingScreenState extends State<CountingScreen>
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: _isStarted ? const Color(0xFF059669) : AppColors.textLight,
+                    color: _isStarted
+                        ? const Color(0xFF059669)
+                        : AppColors.textLight,
                   ),
                 ),
               ),
@@ -787,9 +846,10 @@ class _CountingScreenState extends State<CountingScreen>
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('إجمالي الجلسة',
-                      style: TextStyle(
-                          fontSize: 10, color: AppColors.textMedium)),
+                  Text(
+                    'إجمالي الجلسة',
+                    style: TextStyle(fontSize: 10, color: AppColors.textMedium),
+                  ),
                   Text(
                     '$_sessionTotal',
                     style: const TextStyle(
@@ -810,7 +870,9 @@ class _CountingScreenState extends State<CountingScreen>
                     Text(
                       '${(_progressPercent * 100).toInt()}%  ($_sessionTotal/$_targetCount)',
                       style: TextStyle(
-                          fontSize: 10, color: AppColors.textMedium),
+                        fontSize: 10,
+                        color: AppColors.textMedium,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     ClipRRect(
@@ -820,7 +882,8 @@ class _CountingScreenState extends State<CountingScreen>
                         minHeight: 5,
                         backgroundColor: AppColors.accentLight,
                         valueColor: const AlwaysStoppedAnimation(
-                            AppColors.primaryLight),
+                          AppColors.primaryLight,
+                        ),
                       ),
                     ),
                   ],
@@ -839,10 +902,14 @@ class _CountingScreenState extends State<CountingScreen>
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: hasCount ? AppColors.accentLight : const Color(0xFFF8FAFC),
+                  color: hasCount
+                      ? AppColors.accentLight
+                      : const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                    color: hasCount ? AppColors.primaryLight : const Color(0xFFE2E8F0),
+                    color: hasCount
+                        ? AppColors.primaryLight
+                        : const Color(0xFFE2E8F0),
                     width: hasCount ? 1.2 : 1.0,
                   ),
                 ),
@@ -879,60 +946,70 @@ class _CountingScreenState extends State<CountingScreen>
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(cat.icon, size: 14, color: AppColors.primaryLight),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    cat.nameAr,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textDark,
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Row(
+            children: [
+              // اليمين: زر المينص (طرح)
+              _counterButton(
+                icon: Icons.remove,
+                color: AppColors.counterRed,
+                bgColor: AppColors.counterRedLight,
+                onTap: () => _decrement(index),
+              ),
+
+              // المنتصف: أيكونة المركبة واسمها والعدد
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(cat.icon, size: 13, color: AppColors.primaryLight),
+                        const SizedBox(width: 3),
+                        Flexible(
+                          child: Text(
+                            cat.nameAr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textDark,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ),
-              ],
-            ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 150),
-              child: Text(
-                cat.count.toString().padLeft(2, '0'),
-                key: ValueKey(cat.count),
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.textDark,
-                  height: 1.0,
+                    const SizedBox(height: 2),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 150),
+                      child: Text(
+                        cat.count.toString().padLeft(2, '0'),
+                        key: ValueKey(cat.count),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.textDark,
+                          height: 1.0,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _counterButton(
-                  icon: Icons.remove,
-                  color: AppColors.counterRed,
-                  bgColor: AppColors.counterRedLight,
-                  onTap: () => _decrement(index),
-                ),
-                _counterButton(
-                  icon: Icons.add,
-                  color: AppColors.counterBlue,
-                  bgColor: AppColors.counterBlueLight,
-                  onTap: () => _increment(index),
-                ),
-              ],
-            ),
-          ],
+
+              // الشمال: زر البلص (إضافة)
+              _counterButton(
+                icon: Icons.add,
+                color: AppColors.counterBlue,
+                bgColor: AppColors.counterBlueLight,
+                onTap: () => _increment(index),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -948,8 +1025,8 @@ class _CountingScreenState extends State<CountingScreen>
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 100),
-        width: 34,
-        height: 26,
+        width: 32,
+        height: 34,
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(8),
@@ -974,69 +1051,69 @@ class _CountingScreenState extends State<CountingScreen>
                 children: [
                   _actionBtn(
                     label: 'ابدأ',
-                color: Colors.white,
-                bgColor: AppColors.btnStart,
-                onTap: (!_isStarted)
-                    ? () {
-                        _stopTimer();
-                        setState(() {
-                          _isStarted = true;
-                          _isPaused = false;
-                          _secondsElapsed = 0;
-                          _elapsed = '00:00:00';
-                        });
-                        _startTimer();
-                        _startCountingSession();
-                      }
-                    : null,
-              ),
-              _actionBtn(
-                label: 'إيقاف',
-                color: Colors.white,
-                bgColor: AppColors.btnPause,
-                onTap: (_isStarted && !_isPaused)
-                    ? () => setState(() => _isPaused = true)
-                    : null,
-              ),
-              _actionBtn(
-                label: 'استئناف',
-                color: Colors.white,
-                bgColor: AppColors.btnResume,
-                onTap: (_isStarted && _isPaused)
-                    ? () => setState(() => _isPaused = false)
-                    : null,
-              ),
-              _actionBtn(
-                label: 'إنهاء',
-                color: Colors.white,
-                bgColor: AppColors.btnEnd,
-                onTap: _isStarted
-                    ? () async {
-                        _stopTimer();
-                        final String finalTime = _elapsed;
+                    color: Colors.white,
+                    bgColor: AppColors.btnStart,
+                    onTap: (!_isStarted)
+                        ? () {
+                            _stopTimer();
+                            setState(() {
+                              _isStarted = true;
+                              _isPaused = false;
+                              _secondsElapsed = 0;
+                              _elapsed = '00:00:00';
+                            });
+                            _startTimer();
+                            _startCountingSession();
+                          }
+                        : null,
+                  ),
+                  _actionBtn(
+                    label: 'إيقاف',
+                    color: Colors.white,
+                    bgColor: AppColors.btnPause,
+                    onTap: (_isStarted && !_isPaused)
+                        ? () => setState(() => _isPaused = true)
+                        : null,
+                  ),
+                  _actionBtn(
+                    label: 'استئناف',
+                    color: Colors.white,
+                    bgColor: AppColors.btnResume,
+                    onTap: (_isStarted && _isPaused)
+                        ? () => setState(() => _isPaused = false)
+                        : null,
+                  ),
+                  _actionBtn(
+                    label: 'إنهاء',
+                    color: Colors.white,
+                    bgColor: AppColors.btnEnd,
+                    onTap: _isStarted
+                        ? () async {
+                            _stopTimer();
+                            final String finalTime = _elapsed;
 
-                        if (_currentSessionId != null) {
-                          final currentMinute = (_secondsElapsed ~/ 60) + 1;
-                          _syncCurrentMinute(currentMinute);
+                            if (_currentSessionId != null) {
+                              final currentMinute = (_secondsElapsed ~/ 60) + 1;
+                              _syncCurrentMinute(currentMinute);
 
-                          final totals = {
-                            for (var c in _categories) c.nameAr: c.count
-                          };
-                          await CountingService().endSession(
-                            sessionId: _currentSessionId!,
-                            totalCount: _sessionTotal,
-                            categoryTotals: totals,
-                          );
-                        }
+                              final totals = {
+                                for (var c in _categories) c.nameAr: c.count,
+                              };
+                              await CountingService().endSession(
+                                sessionId: _currentSessionId!,
+                                totalCount: _sessionTotal,
+                                categoryTotals: totals,
+                              );
+                            }
 
-                        setState(() {
-                          _isStarted = false;
-                          _isPaused = false;
-                        });
-                        _showEndDialog(finalTime);
-                      }
-                    : null,
-              ),
+                            setState(() {
+                              _isStarted = false;
+                              _isPaused = false;
+                            });
+                            _showEndDialog(finalTime);
+                          }
+                        : null,
+                  ),
                 ],
               ),
             ],
@@ -1055,7 +1132,10 @@ class _CountingScreenState extends State<CountingScreen>
           children: [
             Icon(Icons.logout_rounded, color: Colors.redAccent, size: 24),
             SizedBox(width: 10),
-            Text('تسجيل الخروج', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text(
+              'تسجيل الخروج',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ],
         ),
         content: const Text(
@@ -1065,20 +1145,28 @@ class _CountingScreenState extends State<CountingScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('إلغاء', style: TextStyle(color: Color(0xFF64748B))),
+            child: const Text(
+              'إلغاء',
+              style: TextStyle(color: Color(0xFF64748B)),
+            ),
           ),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             onPressed: () {
               Navigator.pop(ctx);
               _handleLogout();
             },
             icon: const Icon(Icons.logout_rounded, size: 16),
-            label: const Text('تأكيد الخروج', style: TextStyle(fontWeight: FontWeight.bold)),
+            label: const Text(
+              'تأكيد الخروج',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -1107,7 +1195,7 @@ class _CountingScreenState extends State<CountingScreen>
                     color: bgColor.withOpacity(0.35),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
-                  )
+                  ),
                 ],
         ),
         child: Text(
@@ -1144,8 +1232,11 @@ class _CountingScreenState extends State<CountingScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Row(
           children: [
-            Icon(Icons.check_circle_outline,
-                color: AppColors.success, size: 26),
+            Icon(
+              Icons.check_circle_outline,
+              color: AppColors.success,
+              size: 26,
+            ),
             SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -1184,21 +1275,49 @@ class _CountingScreenState extends State<CountingScreen>
                 children: [
                   Column(
                     children: [
-                      const Text('🕒 وقت البدء (الفتح)',
-                          style: TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.bold)),
+                      const Text(
+                        '🕒 وقت البدء (الفتح)',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF64748B),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 2),
-                      Text(openTimeStr,
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
+                      Text(
+                        openTimeStr,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
                     ],
                   ),
-                  Container(width: 1, height: 26, color: const Color(0xFFCBD5E1)),
+                  Container(
+                    width: 1,
+                    height: 26,
+                    color: const Color(0xFFCBD5E1),
+                  ),
                   Column(
                     children: [
-                      const Text('🏁 وقت الإنهاء (القفل)',
-                          style: TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.bold)),
+                      const Text(
+                        '🏁 وقت الإنهاء (القفل)',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF64748B),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 2),
-                      Text(closeTimeStr,
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Color(0xFF059669))),
+                      Text(
+                        closeTimeStr,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF059669),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -1207,8 +1326,11 @@ class _CountingScreenState extends State<CountingScreen>
             const SizedBox(height: 10),
             Row(
               children: [
-                const Icon(Icons.timer_outlined,
-                    size: 16, color: AppColors.textMedium),
+                const Icon(
+                  Icons.timer_outlined,
+                  size: 16,
+                  color: AppColors.textMedium,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   'مدة الجلسة: $finalTime',
@@ -1235,8 +1357,11 @@ class _CountingScreenState extends State<CountingScreen>
               ),
               child: const Row(
                 children: [
-                  Icon(Icons.cloud_done_outlined,
-                      color: AppColors.primaryLight, size: 18),
+                  Icon(
+                    Icons.cloud_done_outlined,
+                    color: AppColors.primaryLight,
+                    size: 18,
+                  ),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(

@@ -1,6 +1,9 @@
+import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:path_provider/path_provider.dart';
 import '../theme/app_colors.dart';
 import '../services/auth_service.dart';
 import '../services/counting_service.dart';
@@ -39,28 +42,157 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     super.dispose();
   }
 
-  void _exportDataToExcelCSV(BuildContext context) {
-    final List<Map<String, dynamic>> sessions = CountingService().getLocalSessions();
+  Future<void> _exportDataToExcelCSV(BuildContext context) async {
+    // إظهار مؤشر التحميل أثناء جلب البيانات الشاملة من Firestore
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(color: AppColors.primaryLight),
+                SizedBox(width: 16),
+                Text('جاري جلب كامل بيانات المستخدمين والجلسات...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    List<Map<String, dynamic>> sessions = [];
+    List<Map<String, dynamic>> users = [];
+    List<Map<String, dynamic>> auditLogs = [];
+
+    // 1. تحميل الكاش المحلي أولاً لضمان عدم خروج الملف فارغاً أبداً
+    try {
+      await CountingService().loadSavedSessions();
+      await AuthService().loadSavedUsers();
+      await AuthService().loadSavedAuditLogs();
+    } catch (_) {}
+
+    sessions = CountingService().getLocalSessions();
+    users = AuthService().getLocalUsers();
+    auditLogs = AuthService().getAuditLogs();
+
+    // 2. المحاولة من Firestore بدون orderBy لتفادي مشاكل Indexing في فايبربيس
+    try {
+      final snapSessions = await FirebaseFirestore.instance
+          .collection('counting_sessions')
+          .get();
+
+      for (var doc in snapSessions.docs) {
+        final data = doc.data();
+        final map = {
+          'id': doc.id,
+          'userId': data['userId'] ?? '',
+          'username': data['username'] ?? 'مستخدم ميداني',
+          'latitude': data['latitude'],
+          'longitude': data['longitude'],
+          'locationName': data['locationName'] ?? 'غير محدد',
+          'status': data['status'] ?? 'active',
+          'startTime': data['startTime'],
+          'endTime': data['endTime'],
+          'totalCount': data['totalCount'] ?? 0,
+          'categoryTotals': Map<String, dynamic>.from(data['categoryTotals'] ?? {}),
+          'minuteLogs': List<dynamic>.from(data['minuteLogs'] ?? []),
+        };
+        final idx = sessions.indexWhere((s) => s['id'] == doc.id);
+        if (idx >= 0) {
+          sessions[idx] = map;
+        } else {
+          sessions.add(map);
+        }
+      }
+    } catch (e) {
+      print('[Export] Firestore sessions fetch error: $e');
+    }
+
+    try {
+      final snapUsers = await FirebaseFirestore.instance
+          .collection('users')
+          .get();
+
+      for (var doc in snapUsers.docs) {
+        final data = doc.data();
+        final map = {
+          'id': doc.id,
+          'username': data['username'] ?? '',
+          'role': data['role'] ?? 'user',
+          'createdAt': data['createdAt'],
+        };
+        final idx = users.indexWhere((u) => u['id'] == doc.id);
+        if (idx >= 0) {
+          users[idx] = map;
+        } else {
+          users.add(map);
+        }
+      }
+    } catch (e) {
+      print('[Export] Firestore users fetch error: $e');
+    }
+
+    try {
+      final snapAudit = await FirebaseFirestore.instance
+          .collection('audit_logs')
+          .get();
+
+      for (var doc in snapAudit.docs) {
+        final data = doc.data();
+        final map = {
+          'username': data['username'] ?? '',
+          'role': data['role'] ?? 'user',
+          'action': data['action'] ?? '',
+          'timestamp': data['timestamp'],
+        };
+        if (!auditLogs.any((a) => a['username'] == map['username'] && a['timestamp'] == map['timestamp'])) {
+          auditLogs.add(map);
+        }
+      }
+    } catch (e) {
+      print('[Export] Firestore audit fetch error: $e');
+    }
+
+    // الدمج مع الجلسات المحفوظة محلياً لضمان بعدم ضياع أي بيانات
+    final localSessions = CountingService().getLocalSessions();
+    for (var local in localSessions) {
+      if (!sessions.any((s) => s['id'] == local['id'])) {
+        sessions.add(local);
+      }
+    }
+
+    if (context.mounted) {
+      Navigator.pop(context); // إغلاق مؤشر التحميل
+    }
 
     final StringBuffer csv = StringBuffer();
     // UTF-8 BOM for Microsoft Excel Arabic support
     csv.write('\uFEFF');
 
-    csv.writeln('نظام V-Count - تقرير الرصد الميداني التفصيلي الشامل');
-    csv.writeln('تاريخ التصدير,${DateTime.now().toString()}');
+    csv.writeln('نظام V-Count - التقرير الميداني والشامل لبيانات المستخدمين والرصد');
+    csv.writeln('تاريخ التصدير,${_formatDateTimeFormatted(DateTime.now())}');
+    csv.writeln('إجمالي الجلسات,${sessions.length}');
+    csv.writeln('إجمالي المستخدمين,${users.length}');
     csv.writeln('');
 
-    // Table 1: Session Summaries
-    csv.writeln('--- جدول (1): ملخص جلسات العد والرصد الميداني ---');
+    // Table 1: Session Summaries per User
+    csv.writeln('--- جدول (1): ملخص جلسات العد والرصد الميداني لكل يوزر ---');
     csv.writeln(
-      'اسم العداد / المشغل,حالة الجلسة,توقيت الفتح (البدء),توقيت القفل (الإنهاء),اسم الموقع والمحطة,إحداثيات Lat,إحداثيات Long,إجمالي المركبات المرصودة,سيارة خاصة,تاكسي,ميكروباص,شاحنة,حافلة,دراجة نارية,دراجة',
+      'اسم اليوزر (العداد),معرّف اليوزر (User ID),حالة الجلسة,توقيت البدء (الفتح),توقيت القفل (الإنهاء),اسم الموقع والمحطة,إحداثيات Lat,إحداثيات Long,إجمالي المركبات,سيارة خاصة,تاكسي,ميكروباص,أتوبيس,شاحنة خفيفة,شاحنة,موتوسيكل,توك توك,دراجة',
     );
 
     for (var session in sessions) {
       final username = _cleanCsv(session['username'] ?? 'مستخدم ميداني');
+      final userId = _cleanCsv(session['userId'] ?? '--');
       final status = session['status'] == 'active' ? 'نشط 🟢' : 'مكتمل 🏁';
-      final openTime = _cleanCsv(session['startTime'] ?? '--');
-      final closeTime = session['status'] == 'active' ? 'جارية الآن' : _cleanCsv(session['endTime'] ?? '--');
+      final openTime = _cleanCsv(_formatDateTimeFormatted(session['startTime']));
+      final closeTime = session['status'] == 'active'
+          ? 'جارية الآن'
+          : _cleanCsv(_formatDateTimeFormatted(session['endTime']));
       final location = _cleanCsv(session['locationName'] ?? 'غير محدد');
       final lat = session['latitude']?.toString() ?? '--';
       final lng = session['longitude']?.toString() ?? '--';
@@ -75,24 +207,27 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       final car = categoryTotals['سيارة خاصة'] ?? 0;
       final taxi = categoryTotals['تاكسي'] ?? 0;
       final microbus = categoryTotals['ميكروباص'] ?? 0;
+      final bus = categoryTotals['أتوبيس'] ?? categoryTotals['حافلة'] ?? 0;
+      final lightTruck = categoryTotals['شاحنة خفيفة'] ?? 0;
       final truck = categoryTotals['شاحنة'] ?? 0;
-      final bus = categoryTotals['حافلة'] ?? 0;
-      final motorcycle = categoryTotals['دراجة نارية'] ?? 0;
+      final motorcycle = categoryTotals['موتوسيكل'] ?? categoryTotals['دراجة نارية'] ?? 0;
+      final toktok = categoryTotals['توك توك'] ?? 0;
       final bicycle = categoryTotals['دراجة'] ?? 0;
 
       csv.writeln(
-        '"$username","$status","$openTime","$closeTime","$location","$lat","$lng",$total,$car,$taxi,$microbus,$truck,$bus,$motorcycle,$bicycle',
+        '"$username","$userId","$status","$openTime","$closeTime","$location","$lat","$lng",$total,$car,$taxi,$microbus,$bus,$lightTruck,$truck,$motorcycle,$toktok,$bicycle',
       );
     }
 
     csv.writeln('');
-    csv.writeln('--- جدول (2): تفاصيل الرصد دقيقة بدقيقة (Minute-by-Minute Granular Logs) ---');
+    csv.writeln('--- جدول (2): تفاصيل الرصد دقيقة بدقيقة لكل مستخدم (Minute-by-Minute Logs) ---');
     csv.writeln(
-      'اسم العداد,معرف الجلسة,رقم الدقيقة,توقيت الدقيقة,فئة المركبة المرصودة,العدد المرصود في هذه الدقيقة,موقع الإحداثيات للدقيقة',
+      'اسم اليوزر,معرّف اليوزر,معرف الجلسة,رقم الدقيقة,توقيت الدقيقة,فئة المركبة المرصودة,العدد المرصود في هذه الدقيقة,موقع الإحداثيات للدقيقة',
     );
 
     for (var session in sessions) {
       final username = _cleanCsv(session['username'] ?? 'مستخدم ميداني');
+      final userId = _cleanCsv(session['userId'] ?? '--');
       final sessionId = _cleanCsv(session['id'] ?? '');
       final location = _cleanCsv(session['locationName'] ?? 'غير محدد');
       final List minuteLogs = (session['minuteLogs'] is List) ? List.from(session['minuteLogs']) : [];
@@ -105,12 +240,34 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           countsRaw.forEach((catName, countVal) {
             if ((countVal as num) > 0) {
               csv.writeln(
-                '"$username","$sessionId",$minuteNum,"$timeCode","${_cleanCsv(catName.toString())}",$countVal,"$location"',
+                '"$username","$userId","$sessionId",$minuteNum,"$timeCode","${_cleanCsv(catName.toString())}",$countVal,"$location"',
               );
             }
           });
         }
       }
+    }
+
+    csv.writeln('');
+    csv.writeln('--- جدول (3): قائمة جميع المستخدمين الحالية بالنظام ---');
+    csv.writeln('اسم اليوزر (Username),معرف المستخدم (User ID),نوع الصلاحية (Role),تاريخ الإنشاء');
+    for (var u in users) {
+      final uname = _cleanCsv(u['username'] ?? '');
+      final uid = _cleanCsv(u['id'] ?? '');
+      final urole = u['role'] == 'admin' ? 'أدمن 👑' : 'مستخدم ميداني (عدّاد)';
+      final created = _cleanCsv(_formatDateTimeFormatted(u['createdAt']));
+      csv.writeln('"$uname","$uid","$urole","$created"');
+    }
+
+    csv.writeln('');
+    csv.writeln('--- جدول (4): سجل حركات الدخول والخروج للمستخدمين (Audit Logs) ---');
+    csv.writeln('اسم اليوزر,الصلاحية,نوع الحركة,تاريخ وتوقيت الحركة');
+    for (var a in auditLogs) {
+      final uname = _cleanCsv(a['username'] ?? '');
+      final urole = a['role'] == 'admin' ? 'أدمن' : 'عدّاد';
+      final action = _cleanCsv(a['action'] ?? '');
+      final timeStr = _cleanCsv(_formatDateTimeFormatted(a['timestamp']));
+      csv.writeln('"$uname","$urole","$action","$timeStr"');
     }
 
     final csvContent = csv.toString();
@@ -155,28 +312,108 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             onPressed: () => Navigator.pop(ctx),
             child: const Text('إغلاق'),
           ),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981)),
+          OutlinedButton.icon(
             onPressed: () {
               Clipboard.setData(ClipboardData(text: csvContent));
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('✅ تم نسخ محتوى ملف Excel (CSV) إلى الحافظة بنجاح!'),
-                  backgroundColor: Color(0xFF10B981),
+                  content: Text('📋 تم نسخ محتوى ملف Excel (CSV) إلى الحافظة!'),
+                  backgroundColor: Color(0xFF3B82F6),
                 ),
               );
-              Navigator.pop(ctx);
             },
-            icon: const Icon(Icons.copy_rounded, size: 16, color: Colors.white),
-            label: const Text('نسخ محتوى Excel (CSV)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            icon: const Icon(Icons.copy_rounded, size: 16),
+            label: const Text('نسخ النص'),
+          ),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981)),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final savedPath = await _saveCsvFile(csvContent);
+              if (!context.mounted) return;
+
+              if (savedPath != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    duration: const Duration(seconds: 6),
+                    content: Text('✅ تم تنزيل وتنزيل ملف Excel بحجم حقيقي!\n📁 المسار: $savedPath'),
+                    backgroundColor: const Color(0xFF10B981),
+                  ),
+                );
+              } else {
+                Clipboard.setData(ClipboardData(text: csvContent));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('✅ تم نسخ محتوى CSV إلى الحافظة بنجاح!'),
+                    backgroundColor: Color(0xFF10B981),
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.download_rounded, size: 18, color: Colors.white),
+            label: const Text('تحميل وتنزيل الملف (CSV)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 
+  Future<String?> _saveCsvFile(String csvContent) async {
+    try {
+      final now = DateTime.now();
+      final dateStr =
+          "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}";
+      final fileName = "vcount_report_$dateStr.csv";
+
+      Directory? dir;
+      if (Platform.isAndroid) {
+        dir = Directory('/storage/emulated/0/Download');
+        if (!await dir.exists()) {
+          dir = await getExternalStorageDirectory();
+        }
+      } else if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+        dir = await getDownloadsDirectory() ?? await getApplicationDocumentsDirectory();
+      } else {
+        dir = await getApplicationDocumentsDirectory();
+      }
+
+      dir ??= await getApplicationDocumentsDirectory();
+
+      final file = File('${dir.path}/$fileName');
+      await file.writeAsString(csvContent, encoding: utf8);
+      return file.path;
+    } catch (_) {
+      try {
+        final fallbackDir = await getApplicationDocumentsDirectory();
+        final now = DateTime.now();
+        final fileName = "vcount_report_${now.millisecondsSinceEpoch}.csv";
+        final file = File('${fallbackDir.path}/$fileName');
+        await file.writeAsString(csvContent, encoding: utf8);
+        return file.path;
+      } catch (_) {
+        return null;
+      }
+    }
+  }
+
   String _cleanCsv(String val) {
     return val.replaceAll('"', '""').replaceAll('\n', ' ');
+  }
+
+  String _formatDateTimeFormatted(dynamic val) {
+    if (val == null) return '--';
+    if (val is Timestamp) {
+      final dt = val.toDate();
+      return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
+    }
+    if (val is DateTime) {
+      return '${val.year}-${val.month.toString().padLeft(2, '0')}-${val.day.toString().padLeft(2, '0')} ${val.hour.toString().padLeft(2, '0')}:${val.minute.toString().padLeft(2, '0')}:${val.second.toString().padLeft(2, '0')}';
+    }
+    final dt = DateTime.tryParse(val.toString());
+    if (dt != null) {
+      return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
+    }
+    return val.toString();
   }
 
   @override

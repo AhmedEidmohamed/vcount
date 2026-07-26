@@ -301,7 +301,7 @@ class _LoginScreenState extends State<LoginScreen>
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
-          textDirection: TextDirection.ltr,
+          textAlign: TextAlign.right,
           style: const TextStyle(
             fontSize: 15,
             color: AppColors.textDark,
