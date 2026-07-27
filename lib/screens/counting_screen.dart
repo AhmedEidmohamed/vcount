@@ -12,10 +12,16 @@ import 'login_screen.dart';
 // نموذج بيانات فئة المركبة
 class VehicleCategory {
   final String nameAr;
+  final String nameEn;
   final IconData icon;
   int count;
 
-  VehicleCategory({required this.nameAr, required this.icon, this.count = 0});
+  VehicleCategory({
+    required this.nameAr,
+    required this.nameEn,
+    required this.icon,
+    this.count = 0,
+  });
 }
 
 class CountingScreen extends StatefulWidget {
@@ -62,15 +68,15 @@ class _CountingScreenState extends State<CountingScreen>
 
   // فئات المركبات
   final List<VehicleCategory> _categories = [
-    VehicleCategory(nameAr: 'سيارة خاصة', icon: Icons.directions_car),
-    VehicleCategory(nameAr: 'تاكسي', icon: Icons.local_taxi),
-    VehicleCategory(nameAr: 'ميكروباص', icon: Icons.airport_shuttle),
-    VehicleCategory(nameAr: 'أتوبيس', icon: Icons.directions_bus),
-    VehicleCategory(nameAr: 'شاحنة خفيفة', icon: Icons.local_shipping),
-    VehicleCategory(nameAr: 'شاحنة', icon: Icons.fire_truck),
-    VehicleCategory(nameAr: 'موتوسيكل', icon: Icons.two_wheeler),
-    VehicleCategory(nameAr: 'توك توك', icon: Icons.electric_rickshaw),
-    VehicleCategory(nameAr: 'دراجة', icon: Icons.pedal_bike),
+    VehicleCategory(nameAr: 'سيارة خاصة', nameEn: 'Private Car', icon: Icons.directions_car),
+    VehicleCategory(nameAr: 'تاكسي', nameEn: 'Taxi', icon: Icons.local_taxi),
+    VehicleCategory(nameAr: 'ميكروباص', nameEn: 'Microbus', icon: Icons.airport_shuttle),
+    VehicleCategory(nameAr: 'أتوبيس', nameEn: 'Bus', icon: Icons.directions_bus),
+    VehicleCategory(nameAr: 'شاحنة خفيفة', nameEn: 'Light Truck', icon: Icons.local_shipping),
+    VehicleCategory(nameAr: 'شاحنة', nameEn: 'Heavy Truck', icon: Icons.fire_truck),
+    VehicleCategory(nameAr: 'موتوسيكل', nameEn: 'Motorcycle', icon: Icons.two_wheeler),
+    VehicleCategory(nameAr: 'توك توك', nameEn: 'Tuk Tuk', icon: Icons.electric_rickshaw),
+    VehicleCategory(nameAr: 'دراجة', nameEn: 'Bicycle', icon: Icons.pedal_bike),
   ];
 
   // تتبع الأعداد التي تم رصدها في الدقيقة الحالية فقط
@@ -382,14 +388,14 @@ class _CountingScreenState extends State<CountingScreen>
           _elapsed = _formatTime(_secondsElapsed);
         });
 
-        // مزامنة الدقيقة الحالية واختبار انتقال الدقيقة
-        final currentMinute = (_secondsElapsed ~/ 60) + 1;
-        if (currentMinute != _lastSyncedMinute) {
+        // مزامنة كل 30 ثانية واختبار انتقال الفترات
+        final currentInterval = (_secondsElapsed ~/ 30) + 1;
+        if (currentInterval != _lastSyncedMinute) {
           if (_lastSyncedMinute > 0) {
             _currentMinuteCounts.clear();
           }
-          _syncCurrentMinute(currentMinute);
-          _lastSyncedMinute = currentMinute;
+          _syncCurrentMinute(currentInterval);
+          _lastSyncedMinute = currentInterval;
         }
       }
     });
@@ -491,11 +497,11 @@ class _CountingScreenState extends State<CountingScreen>
 
     final totals = {for (var c in _categories) c.nameAr: c.count};
 
-    final currentMinute = (_secondsElapsed ~/ 60) + 1;
+    final currentInterval = (_secondsElapsed ~/ 30) + 1;
 
     CountingService().updateSessionMinuteData(
       sessionId: _currentSessionId!,
-      minuteNumber: currentMinute,
+      minuteNumber: currentInterval,
       timeFormatted: _formatTime(_secondsElapsed),
       latitude: _currentLatitude,
       longitude: _currentLongitude,
@@ -570,20 +576,39 @@ class _CountingScreenState extends State<CountingScreen>
           child: Row(
             children: [
               Container(
-                width: 34,
-                height: 34,
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primary, AppColors.primaryLight],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: const Color(0xFF1E1E1E),
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFFD4AF37).withOpacity(0.5),
+                    width: 1.2,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.bar_chart_rounded,
-                  color: Colors.white,
-                  size: 18,
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: const Color(0xFFD4AF37), width: 2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(width: 3),
+                      const Text(
+                        'M',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -592,7 +617,7 @@ class _CountingScreenState extends State<CountingScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'V-Count Pro (${widget.username})',
+                      'MasaratMisr-VCount (${widget.username})',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -971,12 +996,12 @@ class _CountingScreenState extends State<CountingScreen>
                         const SizedBox(width: 3),
                         Flexible(
                           child: Text(
-                            cat.nameAr,
+                            cat.nameEn,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
                               color: AppColors.textDark,
                             ),
                           ),
@@ -1093,8 +1118,8 @@ class _CountingScreenState extends State<CountingScreen>
                             final String finalTime = _elapsed;
 
                             if (_currentSessionId != null) {
-                              final currentMinute = (_secondsElapsed ~/ 60) + 1;
-                              _syncCurrentMinute(currentMinute);
+                              final currentInterval = (_secondsElapsed ~/ 30) + 1;
+                              _syncCurrentMinute(currentInterval);
 
                               final totals = {
                                 for (var c in _categories) c.nameAr: c.count,

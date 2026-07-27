@@ -67,7 +67,7 @@ class VCountApp extends StatelessWidget {
     }
 
     return MaterialApp(
-      title: 'V-Count Pro',
+      title: 'MasaratMisr-VCount',
       debugShowCheckedModeBanner: false,
       locale: const Locale('ar'),
       // دعم اتجاه النص من اليمين لليسار

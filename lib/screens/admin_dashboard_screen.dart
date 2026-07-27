@@ -441,19 +441,37 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       title: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
             decoration: BoxDecoration(
-              color: AppColors.primaryLight.withOpacity(0.1),
+              color: const Color(0xFF1E1E1E),
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: const Color(0xFFD4AF37).withOpacity(0.6),
+                width: 1.2,
+              ),
             ),
-            child: const Icon(Icons.show_chart_rounded,
-                color: AppColors.primaryLight, size: 22),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.polyline_rounded, color: Color(0xFFD4AF37), size: 16),
+                SizedBox(width: 4),
+                Text(
+                  'MASARAT',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 11,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           const Text(
-            'V-Count Pro',
+            'MasaratMisr - VCount',
             style: TextStyle(
-              fontSize: 19,
+              fontSize: 18,
               fontWeight: FontWeight.w900,
               color: AppColors.primary,
               letterSpacing: -0.5,
@@ -571,10 +589,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1D4ED8), // أزرق ملكي متألق
+                backgroundColor: const Color(0xFFC59B27), // ذهبي مسارات مصر الفاخر
                 foregroundColor: Colors.white,
                 elevation: 4,
-                shadowColor: const Color(0xFF1D4ED8).withOpacity(0.4),
+                shadowColor: const Color(0xFFC59B27).withOpacity(0.4),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -751,11 +769,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEEF2FF),
+                      color: const Color(0xFFFEF3C7),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Icons.access_time_filled_rounded,
-                        color: Color(0xFF3B82F6), size: 22),
+                        color: Color(0xFFC59B27), size: 22),
                   ),
                 ],
               ),
@@ -771,14 +789,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               const SizedBox(height: 6),
               const Row(
                 children: [
-                  Icon(Icons.circle_rounded, color: Color(0xFF2563EB), size: 10),
+                  Icon(Icons.circle_rounded, color: Color(0xFFC59B27), size: 10),
                   SizedBox(width: 6),
                   Text(
                     'قيد المراقبة والرصد الميداني الآن',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF2563EB),
+                      color: Color(0xFFC59B27),
                     ),
                   ),
                 ],

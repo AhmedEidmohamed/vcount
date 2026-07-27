@@ -156,34 +156,30 @@ class _LoginScreenState extends State<LoginScreen>
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
       child: Column(
         children: [
-          // أيقونة الشعار
+          // شعار مسارات مصر
           Container(
-            width: 72,
-            height: 72,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.primary, AppColors.primaryLight],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryLight.withOpacity(0.35),
+                  color: Colors.black.withOpacity(0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.bar_chart_rounded,
-              color: Colors.white,
-              size: 36,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(
+                'assets/images/masarat_logo.png',
+                height: 90,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
           const SizedBox(height: 16),
           const Text(
-            'V-Count Pro',
+            'مسارات مصر - VCount',
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
@@ -192,12 +188,12 @@ class _LoginScreenState extends State<LoginScreen>
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            'نظام تحليل المركبات للمؤسسات',
+          const Text(
+            'MasaratMisr-VCount • النظام الهندسي لحصر المركبات',
             style: TextStyle(
               fontSize: 13,
               color: AppColors.textMedium,
-              letterSpacing: 0.3,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
